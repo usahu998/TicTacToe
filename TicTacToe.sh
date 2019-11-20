@@ -19,7 +19,7 @@ nonEmptyBlockCount=1
 someoneWon=false
 whoPlays=false
 computerWinMove=false
-
+computerblockedMove=false
 
 
 #BOARD ARRAY
@@ -85,13 +85,15 @@ function playerInput()
 
 function computerInput()
 {
+	computerWinMove=false
 	echo "Computer is playing"
 	sleep 1
 	winOrBlockMove $computerSymbol
 	winOrBlockMove $playerSymbol
-	
+	checkCorners
 	if [ $computerWinMove = false ]
 	then
+
 		computerPosition=$((RANDOM%9+1))
 		if [[ ${boardPosition[$computerPosition]} != '-' ]]
 		then
@@ -112,10 +114,10 @@ function winOrBlockMove()
 	leftDiagonalValue=4
 	rightDiagonalValue=2
 
-	checkWinningMove $rowValue $columnValue $1
-	checkWinningMove $columnValue $rowValue $1
-	checkWinningMove $leftDiagonalValue $1
-	checkWinningMove $rightDiagonalValue $1
+	checkWinningMove $rowValue $1 $columnValue
+	checkWinningMove $columnValue $1 $rowValue
+	checkWinningMove $leftDiagonalValue $1 0
+	checkWinningMove $rightDiagonalValue $1 0
 
 }
 
@@ -124,33 +126,58 @@ function winOrBlockMove()
 function checkWinningMove()
 {
 	counter=1
-	if [ $computerWinMove=false ]
+	symbol=$2
+	if [ $computerWinMove = false ]
 	then
 		for (( i=1; i<=3; i++ ))
 		do
-			if [[ ${boardPosition[$counter]} == ${boardPosition[$counter+$1+$1]} ]] && [[ ${boardPosition[$counter+$1]} == '-' ]] && [[ ${boardPosition[$counter]} == $3 ]]
+			if [[ ${boardPosition[$counter]} == ${boardPosition[$counter+$1+$1]} ]] && [[ ${boardPosition[$counter+$1]} == '-' ]] && [[ ${boardPosition[$counter]} == $symbol ]]
 			then
 				computerPosition=$(($counter+$1))
 				boardPosition[$computerPosition]=$computerSymbol
 				computerWinMove=true
 				break
-			elif [[  ${boardPosition[$counter]} == ${boardPosition[$counter+$1]} ]] && [[  ${boardPosition[$counter+$1+$1]} == '-' ]] && [[ ${boardPosition[$counter]} == $3 ]]
+			elif [[  ${boardPosition[$counter]} == ${boardPosition[$counter+$1]} ]] && [[  ${boardPosition[$counter+$1+$1]} == '-' ]] && [[ ${boardPosition[$counter]} == $symbol ]]
 			then
 				computerPosition=$(($counter+$1+$1))
 				boardPosition[$computerPosition]=$computerSymbol
 				computerWinMove=true
 				break
-			elif [[ ${boardPosition[$counter+$1]} == ${boardPosition[$counter+$1+$1]} ]] && [[ ${boardPosition[$counter]} == '-' ]] && [[ ${boardPosition[$counter+$1]} == $3 ]]
+			elif [[ ${boardPosition[$counter+$1]} == ${boardPosition[$counter+$1+$1]} ]] && [[ ${boardPosition[$counter]} == '-' ]] && [[ ${boardPosition[$counter+$1]} == $symbol ]]
 			then
 				computerPosition=$counter
 				boardPosition[$computerPosition]=$computerSymbol
 				computerWinMove=true
 				break
 			fi
-			counter=$(($counter+$2))
+			counter=$(($counter+$3))
 		done
 	fi
 }
+
+
+function checkCorners
+{
+	 if [ $computerWinMove = false ]
+   then
+		for((i=1; i<=MAX_BOARD_POSITION; i=$(($i+2)) ))
+		do
+				if [ ${boardPosition[$i]} == '-' ]
+				then
+					computerPosition=$i
+            	boardPosition[$computerPosition]=$computerSymbol
+            	computerWinMove=true
+            break
+				fi
+				if [ $i -eq 3 ]
+				then
+					i=$(($i+2))
+				fi
+		done
+	fi
+}
+
+
 
 function checkHorizontalVerticalWon()
 {
