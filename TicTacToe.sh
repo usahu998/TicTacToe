@@ -91,6 +91,7 @@ function computerInput()
 	winOrBlockMove $computerSymbol
 	winOrBlockMove $playerSymbol
 	checkCorners
+	checkMiddle
 	if [ $computerWinMove = false ]
 	then
 
@@ -177,6 +178,18 @@ function checkCorners
 	fi
 }
 
+
+function checkMiddle()
+{
+	middle=5
+	if [[ $computerWinMove = false ]] && [[ ${boardPosition[$middle]} == '-' ]]
+	then
+					computerPosition=$middle
+               boardPosition[$computerPosition]=$computerSymbol
+               computerWinMove=true
+   fi
+
+}
 
 
 function checkHorizontalVerticalWon()
