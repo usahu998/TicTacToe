@@ -33,12 +33,15 @@ function symbol_Assignment()
 
 	if [ $firstPlay -eq 1 ]
 	then
+		(( whoPlays++ ))
 		PLAYER_SYMBOL='X'
 		COMP_SYMBOL='O'
 		echo "Player symobol : X | Computer symbol : O"
+		echo "Player plays First"
 	else
 		PLAYER_SYMBOL='O'
 		COMP_SYMBOL='X'
 		echo "Player symobol : O | Computer symbol : X"
+		echo "Computer Plays First"
 	fi
 }
