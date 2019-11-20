@@ -11,7 +11,7 @@ MAX_BOARD_POSITION=9
 playerPosition=0
 playerSymbol=''
 computerSymbol=''
-
+nonEmptyBlockCount=1
 
 #boolean Flags
 someoneWon=false
@@ -29,7 +29,6 @@ function initializingBoard()
 		boardPosition[$i]='-'
 	done
 }
-
 
 
 function symbolAssignment()
@@ -78,49 +77,47 @@ function playerInput()
 		echo "Position Occupied Please enter new Position"
 		playerInput
 	fi
+	whoPlays=false
 }
 
 
-function checkHorizontalWinner()
+function computerInput()
 {
-	max_number_rows=3
+	echo "Computer is Playing"
+	sleep 1
+	computerPosition=$((RANDOM%9+1))
+	if [ ${boardPosition[$computerPosition]} == '-' ]
+	then
+		boardPosition[$computerPosition]=$computerSymbol
+	else
+		echo "Computer played Wrong move "
+		computerInput
+	fi
+	whoPlays=true
+}
+
+
+
+
+function checkHorizontalVerticalWon()
+{
 	position=1
 	loopCounter=1
 	while [  $loopCounter -le 3 ]
 	do
-		if [[ ${boardPosition[$position]} == ${boardPosition[$position+1]} ]] && [[  ${boardPosition[$position+1]}  ==  ${boardPosition[$position+2]} ]] && [[ ${boardPosition[$position+2]} == $1 ]]
+		if [[ ${boardPosition[$position]} == ${boardPosition[$position+$3]} ]] && [[  ${boardPosition[$position+$3]}  ==  ${boardPosition[$position+$3+$3]} ]] && [[ ${boardPosition[$position+$3+$3]} == $1 ]]
 		then
 			displayBoard
 			echo " HURRAY!!! $1 wins "
 			someoneWon=true
 			break
 		else
-			position=$(( $position+$max_number_rows ))
+			position=$(( $position+$2 ))
 		fi
 		loopCounter=$(($loopCounter+1))
 	done
 }
 
-
-
-function checkVerticalWinner()
-{
-	position=1
-	loopCounter=1
-	while [ $loopCounter -le 3 ]
-	do
-		if [[ ${boardPosition[$position]} == ${boardPosition[$position+3]} ]] && [[  ${boardPosition[$position+3]}  ==  ${boardPosition[$position+6]} ]] && [[ ${boardPosition[$position+6]} == $1 ]]
-		then
-			displayBoard
-			echo " HURRAY!!! $1 wins "
-			someoneWon=true
-			break
-		else
-			position=$(($position+1))
-		fi
-		loopCounter=$(($loopCounter+1))
-	done
-}
 
 
 
@@ -133,7 +130,7 @@ function checkDiagonalWinner()
 		if [[ ${boardPosition[$position]} == ${boardPosition[$position+4]} ]] && [[  ${boardPosition[$position+4]}  ==  ${boardPosition[$position+8]} ]] && [[ ${boardPosition[$position+8]} == $1 ]]
 		then
 			displayBoard
-			echo " HURRAY!!! $1 wins "
+			echo " Hurray!!! $1 wins "
 			someoneWon=true
 			break
 		elif [[ ${boardPosition[$position+2]} == ${boardPosition[$position+4]} ]] && [[  ${boardPosition[$position+4]}  ==  ${boardPosition[$position+6]} ]] && [[ ${boardPosition[$position+6]} == $1 ]]
@@ -150,22 +147,32 @@ function checkDiagonalWinner()
 
 function checkGameTie()
 {
-	count=1
-	while [ ${boardPosition[$count]} != '-' ]
+	while [ ${boardPosition[$nonEmptyBlockCount]} != '-' ]
 	do
-		if [ $count -eq 9 ]
+		if [ $nonEmptyBlockCount -eq 9 ]
 		then
 			displayBoard
-			echo "Game Is tie"
+			echo "UhUho!!!! Game Is Tie"
 			someoneWon=true
 			break
 		else
-			count=$($count+1)
+			nonEmptyBlockCount=$(($nonEmptyBlockCount+1))
 		fi
 	done
 }
 
 
+
+function checkWon()
+{
+	symbol=$1
+	rowValue=1
+	columnValue=3
+
+	checkHorizontalVerticalWon $symbol $columnValue  $rowValue
+ 	checkHorizontalVerticalWon $symbol $rowValue $columnValue
+	checkDiagonalWinner $symbol
+}
 
 
 
@@ -178,9 +185,15 @@ symbolAssignment
 while [ $someoneWon == false ]
 do
 	displayBoard
-	playerInput
-	checkHorizontalWinner $playerSymbol
-	checkVerticalWinner $playerSymbol
-	checkDiagonalWinner $playerSymbol
-	checkGameTie
+	if [ $whoPlays == true ]
+	then
+		playerInput
+		checkWon $playerSymbol
+		checkGameTie
+	else
+		computerInput
+		checkWon $computerSymbol
+		checkGameTie
+	fi
+
 done
