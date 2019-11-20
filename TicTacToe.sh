@@ -92,18 +92,7 @@ function computerInput()
 	winOrBlockMove $playerSymbol
 	checkCorners
 	checkMiddle
-	if [ $computerWinMove = false ]
-	then
-
-		computerPosition=$((RANDOM%9+1))
-		if [[ ${boardPosition[$computerPosition]} != '-' ]]
-		then
-			echo "Computer played Wrong move "
-			computerInput
-		else
-			boardPosition[$computerPosition]=$computerSymbol
-		fi
-	fi
+	checkRemaining
 	whoPlays=true
 }
 
@@ -191,6 +180,23 @@ function checkMiddle()
 
 }
 
+
+function checkRemaining()
+{
+	if [ $computerWinMove = false ]
+	then
+		for((i=2; i< $MAX_BOARD_POSITION; i=$(($i+2)) ))
+		do
+            	if [ ${boardPosition[$i]} == '-' ]
+            	then
+              		computerPosition=$i
+               	boardPosition[$computerPosition]=$computerSymbol
+               	computerWinMove=true
+           		break
+            	fi
+		done
+	fi
+}
 
 function checkHorizontalVerticalWon()
 {
